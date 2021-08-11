@@ -1,0 +1,39 @@
+name: Deploy
+
+on: 
+  push:
+    branches:
+      - master
+      - main
+  pull_request:
+    branches:
+      - master
+      - main
+
+jobs:
+
+  build: 
+    runs-on: ubuntu-latest
+
+    steps: 
+      - uses: actions/checkout@v2
+
+      - name: Setup Node
+        uses: actions/setup-node@v2
+        with:
+          node-version: 14.x
+
+      - name: Install Dependencies
+        run: yarn --frozen-lockfile
+          
+      - name: Build
+        run: yarn build
+      
+      - name: Deploy application
+        if: ${{ github.ref == 'refs/heads/master' || github.ref == 'refs/heads/main' }}
+        uses: akhileshns/heroku-deploy@v3.12.12
+        with:
+          heroku_api_key: ${{secrets.HEROKU_API_KEY}}
+          heroku_app_name: "pecege-app"
+          heroku_email: "rubens.junqueira@outlook.com"
+          buildpack: "https://github.com/zidizei/heroku-buildpack-tsc#v2.0"
